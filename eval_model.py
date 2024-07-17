@@ -6,6 +6,8 @@ import os
 import pickle
 import re
 import time
+import json
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -16,6 +18,9 @@ import datasets
 import estimators as estimators_lib
 import made
 import transformer
+
+# TODO hxh 单个查询重复预测次数，用于测试波动。（默认为1）
+dup_num = 1
 
 # For inference speed.
 torch.backends.cudnn.deterministic = False
@@ -30,8 +35,9 @@ parser.add_argument('--inference-opts',
                     action='store_true',
                     help='Tracing optimization for better latency.')
 
-parser.add_argument('--num-queries', type=int, default=20, help='# queries.')
+parser.add_argument('--num-queries', type=int, default=10, help='# queries.')
 parser.add_argument('--dataset', type=str, default='dmv-tiny', help='Dataset.')
+parser.add_argument('--queryset', type=str, default='dmv-tiny', help='Dataset.')
 parser.add_argument('--err-csv',
                     type=str,
                     default='results.csv',
@@ -135,6 +141,15 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+'''
+读取测试用的查询和对应的真实基数
+'''
+with open(args.queryset, "r") as file:
+    file_content = json.load(file)
+global_test_query = file_content["query_list"]
+global_test_trueCard = [int(x) for x in file_content["card_list"]]
+global_test_index = 0
+
 
 def InvertOrder(order):
     if order is None:
@@ -150,11 +165,13 @@ def InvertOrder(order):
 
 
 def MakeTable():
-    assert args.dataset in ['dmv-tiny', 'dmv']
+    assert args.dataset in ['dmv-tiny', 'dmv', 'census']
     if args.dataset == 'dmv-tiny':
         table = datasets.LoadDmv('dmv-tiny.csv')
     elif args.dataset == 'dmv':
         table = datasets.LoadDmv()
+    elif args.dataset == 'census':
+        table = datasets.LoadMyDataset("datasets/census.csv")
 
     oracle_est = estimators_lib.Oracle(table)
     if args.run_bn:
@@ -177,6 +194,27 @@ def SampleTupleThenRandom(all_cols,
                           rng,
                           table,
                           return_col_idx=False):
+    global global_test_query, global_test_index, dup_num
+    test_index_dup = global_test_index // dup_num
+    idxs = global_test_query[test_index_dup][0]
+    # idxs = [val - 1 if val >= 2 else val for val in idxs_]
+    # print("idxs is ", idxs)
+    cols = np.take(all_cols, idxs)
+    # print("cols is ", cols)
+    ops = global_test_query[test_index_dup][1]
+    vals = global_test_query[test_index_dup][2]
+    # print("val type is ", type(vals))
+    
+    # 针对census数据集，将整数列进行类型转换
+    if(args.dataset == "census"):
+        for _ in range(len(idxs)):
+            if idxs[_] in [0, 4, 10, 11, 12]:
+                vals[_] = int(vals[_])
+    else:
+        warnings.warn("注意查询列的类型转换！")
+    global_test_index += 1
+    return cols, ops, vals
+    
     s = table.data.iloc[rng.randint(0, table.cardinality)]
     vals = s.values
 
@@ -258,9 +296,18 @@ def Query(estimators,
 def ReportEsts(estimators):
     v = -1
     for est in estimators:
-        print(est.name, 'max', np.max(est.errs), '99th',
-              np.quantile(est.errs, 0.99), '95th', np.quantile(est.errs, 0.95),
-              'median', np.quantile(est.errs, 0.5))
+        print(est.name, 
+              "\n0.0th", f"{np.quantile(est.errs, 0.0):.5f}",
+              "\n25th", f"{np.quantile(est.errs, 0.25):.5f}",
+              "\n50th", f"{np.quantile(est.errs, 0.5):.5f}",
+              "\n75th", f"{np.quantile(est.errs, 0.75):.5f}",
+              "\n90th", f"{np.quantile(est.errs, 0.90):.5f}",
+              "\n95th", f"{np.quantile(est.errs, 0.95):.5f}",
+              "\n99th", f"{np.quantile(est.errs, 0.99):.5f}",
+              "\n99.9th", f"{np.quantile(est.errs, 0.999):.5f}",
+              '\nmean', f"{np.mean(est.errs):.5f}", 
+              "\nmax", f"{np.max(est.errs):.5f}", 
+              "\ntime_ms", f"{np.mean(est.query_dur_ms):.5f}")
         v = max(v, np.max(est.errs))
     return v
 
@@ -282,11 +329,11 @@ def RunN(table,
         do_print = False
         if i % log_every == 0:
             if last_time is not None:
-                print('{:.1f} queries/sec'.format(log_every /
-                                                  (time.time() - last_time)))
+                print('{:.1f} queries/sec'.format(log_every / (time.time() - last_time)))
             do_print = True
             print('Query {}:'.format(i), end=' ')
             last_time = time.time()
+        # 进入这里
         query = GenerateQuery(cols, rng, table)
         Query(estimators,
               do_print,
@@ -296,7 +343,7 @@ def RunN(table,
               table=table,
               oracle_est=oracle_est)
 
-        max_err = ReportEsts(estimators)
+    max_err = ReportEsts(estimators)
     return False
 
 
@@ -482,7 +529,9 @@ def Main():
         all_ckpts = [ckpt for ckpt in all_ckpts if args.blacklist not in ckpt]
 
     selected_ckpts = all_ckpts
-    oracle_cards = LoadOracleCardinalities()
+    # hxh 直接从测试文件中读取查询基数global_test_trueCard
+    # oracle_cards = LoadOracleCardinalities()
+    oracle_cards = global_test_trueCard
     print('ckpts', selected_ckpts)
 
     if not args.run_bn:
@@ -516,7 +565,7 @@ def Main():
                                     fixed_ordering=order,
                                     seed=seed)
         else:
-            if args.dataset in ['dmv-tiny', 'dmv']:
+            if args.dataset in ['dmv-tiny', 'dmv', 'census']:
                 model = MakeMade(
                     scale=args.fc_hiddens,
                     cols_to_train=table.columns,
@@ -591,7 +640,7 @@ def Main():
                  cols_to_train,
                  estimators,
                  rng=np.random.RandomState(1234),
-                 num=args.num_queries,
+                 num=args.num_queries*dup_num,
                  log_every=1,
                  num_filters=None,
                  oracle_cards=oracle_cards,

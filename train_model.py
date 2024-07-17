@@ -16,6 +16,8 @@ import transformer
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('Device', DEVICE)
 
+# TODO hxh 设置线程数
+torch.set_num_threads(45)
 parser = argparse.ArgumentParser()
 
 # Training.
@@ -331,11 +333,13 @@ def TrainTask(seed=0):
     torch.manual_seed(0)
     np.random.seed(0)
 
-    assert args.dataset in ['dmv-tiny', 'dmv']
+    assert args.dataset in ['dmv-tiny', 'dmv', 'census']
     if args.dataset == 'dmv-tiny':
         table = datasets.LoadDmv('dmv-tiny.csv')
     elif args.dataset == 'dmv':
         table = datasets.LoadDmv()
+    elif args.dataset == 'census':
+        table = datasets.LoadMyDataset("datasets/census.csv")
 
     table_bits = Entropy(
         table,
@@ -356,7 +360,7 @@ def TrainTask(seed=0):
                                 fixed_ordering=fixed_ordering,
                                 seed=seed)
     else:
-        if args.dataset in ['dmv-tiny', 'dmv']:
+        if args.dataset in ['dmv-tiny', 'dmv', 'census']:
             model = MakeMade(
                 scale=args.fc_hiddens,
                 cols_to_train=table.columns,

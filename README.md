@@ -22,16 +22,33 @@ conda env create -f environment.yml
 ```
 
 Run the following to test on a tiny 100-row dataset:
+
+激活环境
 ```bash
 source activate naru
-
+```
+训练模型并保存参数
+```bash
 # Trains a ResMADE on dataset 'dmv-tiny'.
 # This will create a checkpoint with path 'models/dmv-tiny-<model spec>.pt'.
-python train_model.py --epochs=100 --residual 
-
+python train_model.py --epochs=10 --residual 
+python train_model.py --epochs=10 --residual --dataset=dmv
+python train_model.py --epochs=10 --residual --dataset=census
+```
+测试模型，获取Q-error
+```bash
 # Use the trained model as a cardinality estimator.
 # --glob supports evaluating a set of checkpoints at once; here, there will only be one match.
 python eval_model.py --glob='dmv-tiny*.pt' --residual
+# --dataset=census【数据集】
+# --queryset==datasets/census_test.json 【查询谓词和基数】
+# --num-queries=1000 【使用的查询数量】
+# --err-csv=result/1.csv【结果保存路径】
+
+python eval_model.py --glob='census-14.7MB-model31.354-data15.574-made-resmade-hidden128_128_128_128-emb32-nodirectIo-binaryInone_hotOut-inputNoEmbIfLeq-10epochs-seed0.pt' --residual --dataset=census --queryset=datasets/census_test.json --num-queries=10 --err-csv=result/1.csv > result/1.txt
+
+nohup python eval_model.py --glob='census-14.7MB-model31.354-data15.574-made-resmade-hidden128_128_128_128-emb32-nodirectIo-binaryInone_hotOut-inputNoEmbIfLeq-10epochs-seed0.pt' --residual --dataset=census --queryset=datasets/census_test.json --num-queries=10 --err-csv=result/1.csv > result/1.txt &
+
 ```
 
 ## Model architectures

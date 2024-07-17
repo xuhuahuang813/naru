@@ -1,2 +1,9 @@
 __pycache__
 .DS_Store
+
+result*.txt
+result*.csv
+
+datasets/*
+models/*
+result/*

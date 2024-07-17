@@ -84,10 +84,18 @@ class CardEst(object):
 
     def report(self):
         est = self
-        print(est.name, "max", np.max(est.errs), "99th",
-              np.quantile(est.errs, 0.99), "95th", np.quantile(est.errs, 0.95),
-              "median", np.quantile(est.errs, 0.5), "time_ms",
-              np.mean(est.query_dur_ms))
+        print(est.name, 
+              "\n0.0th", np.quantile(est.errs, 0.0),
+              "\n25th", np.quantile(est.errs, 0.25),
+              "\n50th", np.quantile(est.errs, 0.5),
+              "\n75th", np.quantile(est.errs, 0.75),
+              "\n90th", np.quantile(est.errs, 0.90),
+              "\n95th", np.quantile(est.errs, 0.95),
+              "\n99th",np.quantile(est.errs, 0.99),
+              "\n99.9th",np.quantile(est.errs, 0.999),
+              '\nmean', np.mean(est.errs), 
+              "\nmax", np.max(est.errs), 
+              "\ntime_ms",np.mean(est.query_dur_ms))
 
 
 def QueryToPredicate(columns, operators, vals, wrap_as_string_cols=None):

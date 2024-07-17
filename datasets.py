@@ -2,6 +2,7 @@
 import os
 
 import numpy as np
+import pandas as pd
 
 import common
 
@@ -18,3 +19,9 @@ def LoadDmv(filename='Vehicle__Snowmobile__and_Boat_Registrations.csv'):
     # there is the same as the default str-ordering (lexicographical).
     type_casts = {'Reg Valid Date': np.datetime64}
     return common.CsvTable('DMV', csv_file, cols, type_casts)
+
+def LoadMyDataset(filepath):   
+    # Make sure that this loads data correctly.  
+    df = pd.read_csv(filepath)  
+    df.fillna('', inplace=True)
+    return common.CsvTable('Name of Dataset', df, cols=df.columns)
