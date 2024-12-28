@@ -34,6 +34,8 @@ source activate naru
 python train_model.py --epochs=10 --residual 
 python train_model.py --epochs=10 --residual --dataset=dmv
 python train_model.py --epochs=10 --residual --dataset=census
+
+python train_model.py --epochs=100 --fc-hiddens=16 --layers=4 --embed-size=8 --residual --direct-io --dataset=census --input-encoding=embed --output-encoding=embed --bs=2048  > train1.txt 2>&1
 ```
 测试模型，获取Q-error
 ```bash
@@ -45,10 +47,11 @@ python eval_model.py --glob='dmv-tiny*.pt' --residual
 # --num-queries=1000 【使用的查询数量】
 # --err-csv=result/1.csv【结果保存路径】
 
-python eval_model.py --glob='census-14.7MB-model31.354-data15.574-made-resmade-hidden128_128_128_128-emb32-nodirectIo-binaryInone_hotOut-inputNoEmbIfLeq-10epochs-seed0.pt' --residual --dataset=census --queryset=datasets/census_test.json --num-queries=10 --err-csv=result/1.csv > result/1.txt
+python eval_model.py --glob='census-0.7MB-model21.589-data15.233-made-resmade-hidden128_128_128_128-emb32-nodirectIo-binaryInone_hotOut-inputNoEmbIfLeq-10epochs-seed0.pt' --residual --dataset=census --queryset=datasets/census_test_mirror.json --num-queries=1000 --psample=2000 --err-csv=result/5.csv > result/5.txt
 
 nohup python eval_model.py --glob='census-14.7MB-model31.354-data15.574-made-resmade-hidden128_128_128_128-emb32-nodirectIo-binaryInone_hotOut-inputNoEmbIfLeq-10epochs-seed0.pt' --residual --dataset=census --queryset=datasets/census_test.json --num-queries=10 --err-csv=result/1.csv > result/1.txt &
-
+python train_model.py --epochs=100 --fc-hiddens=16 --layers=4 --embed-size=8 --residual --direct-io --dataset=census --input-encoding=embed --output-encoding=embed  > train1.txt 2>&1
+python eval_model.py --glob='census-0.1MB-model21.696-data15.233-made-resmade-hidden16_16_16_16-emb8-directIo-embedInembedOut-inputNoEmbIfLeq-100epochs-seed0.pt' --residual --direct-io --input-encoding=embed --output-encoding=embed  --dataset=census --queryset=datasets/census_test_mirror.json --num-queries=1000 --psample=2000 --layers=4 --fc-hiddens=16 --embed-size=8 --err-csv=result1.csv > result1.txt
 ```
 
 ## Model architectures

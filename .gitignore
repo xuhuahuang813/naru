@@ -7,3 +7,9 @@ result*.csv
 datasets/*
 models/*
 result/*
+log/*
+
+hxh_0_generate.py
+hxh_2_diff.py
+eval.sh
+README.md

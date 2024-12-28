@@ -198,7 +198,6 @@ def SampleTupleThenRandom(all_cols,
     global global_test_query, global_test_index, dup_num
     test_index_dup = global_test_index // dup_num
     idxs = global_test_query[test_index_dup][0]
-    print("idxs is ", idxs)
     if(args.dataset == "dmv"):
         dmv_col_dic = {'Record Type': 0, 
                         'Registration Class': 1, 
@@ -232,12 +231,8 @@ def SampleTupleThenRandom(all_cols,
         }
         for idx in range(len(idxs)):
             idxs[idx] = census_col_dic[idxs[idx]]
-        print("idxs is ", idxs)
-        
-    # idxs = [val - 1 if val >= 2 else val for val in idxs_]
-    # print("idxs is ", idxs)
+
     cols = np.take(all_cols, idxs)
-    # print("cols is ", cols)
     ops = global_test_query[test_index_dup][1]
     vals = global_test_query[test_index_dup][2]
     
@@ -246,8 +241,6 @@ def SampleTupleThenRandom(all_cols,
         for idx in range(len(idxs)):
             if(idxs[idx] == 6):
                 vals[idx] = pd.to_datetime(vals[idx]).to_datetime64()
-    # print("ops is ", ops)
-
     # Census数据集，整数列转换
     if(args.dataset == "census"):
         for _ in range(len(idxs)):

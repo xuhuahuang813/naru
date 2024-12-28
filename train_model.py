@@ -14,7 +14,6 @@ import made
 import transformer
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-# DEVICE = 'cpu'
 print('Device', DEVICE)
 
 # TODO hxh 设置线程数
