@@ -89,6 +89,7 @@ parser.add_argument(
     default='one_hot',
     help='Iutput encoding for MADE/ResMADE, {one_hot, embed}.  If embed, '
     'then input encoding should be set to embed as well.')
+parser.add_argument('--embed-size', type=int, default=32)
 
 # Transformer.
 parser.add_argument(
@@ -197,22 +198,65 @@ def SampleTupleThenRandom(all_cols,
     global global_test_query, global_test_index, dup_num
     test_index_dup = global_test_index // dup_num
     idxs = global_test_query[test_index_dup][0]
+    print("idxs is ", idxs)
+    if(args.dataset == "dmv"):
+        dmv_col_dic = {'Record Type': 0, 
+                        'Registration Class': 1, 
+                        'State': 2, 
+                        'County': 3, 
+                        'Body Type': 4, 
+                        'Fuel Type': 5, 
+                        'Reg Valid Date': 6, 
+                        'Color': 7, 
+                        'Scofflaw Indicator': 8, 
+                        'Suspension Indicator': 9, 
+                        'Revocation Indicator': 10}
+        for idx in range(len(idxs)):
+            idxs[idx] = dmv_col_dic[idxs[idx]]
+    if(args.dataset == "census"):
+        census_col_dic = {
+            0: 0,
+            1: 1,
+            3: 2,
+            4: 3,
+            5: 4,
+            6: 5,
+            7: 6,
+            8: 7,
+            9: 8,
+            10: 9,
+            11: 10,
+            12: 11,
+            13: 12,
+            14: 13,
+        }
+        for idx in range(len(idxs)):
+            idxs[idx] = census_col_dic[idxs[idx]]
+        print("idxs is ", idxs)
+        
     # idxs = [val - 1 if val >= 2 else val for val in idxs_]
     # print("idxs is ", idxs)
     cols = np.take(all_cols, idxs)
     # print("cols is ", cols)
     ops = global_test_query[test_index_dup][1]
     vals = global_test_query[test_index_dup][2]
-    # print("val type is ", type(vals))
     
-    # 针对census数据集，将整数列进行类型转换
+    # DMV数据集，日期列转换
+    if(args.dataset == "dmv"):
+        for idx in range(len(idxs)):
+            if(idxs[idx] == 6):
+                vals[idx] = pd.to_datetime(vals[idx]).to_datetime64()
+    # print("ops is ", ops)
+
+    # Census数据集，整数列转换
     if(args.dataset == "census"):
         for _ in range(len(idxs)):
-            if idxs[_] in [0, 4, 10, 11, 12]:
+            if idxs[_] in [0, 3, 9, 10, 11]:
                 vals[_] = int(vals[_])
-    else:
-        warnings.warn("注意查询列的类型转换！")
+    elif(args.dataset not in ["census","dmv"]):
+        print("注意查询列的类型转换！")
     global_test_index += 1
+    print(cols, ops, vals)
     return cols, ops, vals
     
     s = table.data.iloc[rng.randint(0, table.cardinality)]
@@ -454,7 +498,7 @@ def MakeMade(scale, cols_to_train, seed, fixed_ordering=None):
         input_bins=[c.DistributionSize() for c in cols_to_train],
         input_encoding=args.input_encoding,
         output_encoding=args.output_encoding,
-        embed_size=32,
+        embed_size=args.embed_size,
         seed=seed,
         do_direct_io_connections=args.direct_io,
         natural_ordering=False if seed is not None and seed != 0 else True,
@@ -500,6 +544,7 @@ def SaveEstimators(path, estimators, return_df=False):
     for est in estimators:
         data = {
             'est': [est.name] * len(est.errs),
+            'query': global_test_query[:args.num_queries],
             'err': est.errs,
             'est_card': est.est_cards,
             'true_card': est.true_cards,

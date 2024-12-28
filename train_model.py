@@ -14,10 +14,11 @@ import made
 import transformer
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+# DEVICE = 'cpu'
 print('Device', DEVICE)
 
 # TODO hxh 设置线程数
-torch.set_num_threads(45)
+# torch.set_num_threads(45)
 parser = argparse.ArgumentParser()
 
 # Training.
@@ -70,6 +71,7 @@ parser.add_argument(
     default='one_hot',
     help='Iutput encoding for MADE/ResMADE, {one_hot, embed}.  If embed, '
     'then input encoding should be set to embed as well.')
+parser.add_argument('--embed-size', type=int, default=32)
 
 # Transformer.
 parser.add_argument(
@@ -109,6 +111,9 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+print("Arguments:")
+for key, value in args.__dict__.items():
+    print(f"{key}: {value}")
 
 
 def Entropy(name, data, bases=None):
@@ -293,7 +298,7 @@ def MakeMade(scale, cols_to_train, seed, fixed_ordering=None):
         input_bins=[c.DistributionSize() for c in cols_to_train],
         input_encoding=args.input_encoding,
         output_encoding=args.output_encoding,
-        embed_size=32,
+        embed_size=args.embed_size,
         seed=seed,
         do_direct_io_connections=args.direct_io,
         natural_ordering=False if seed is not None and seed != 0 else True,

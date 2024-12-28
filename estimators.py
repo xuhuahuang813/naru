@@ -232,6 +232,10 @@ class ProgressiveSampling(CardEst):
             # Column i.
             op = operators[natural_idx]
             if op is not None:
+                # 打印操作符、列值和查询值的详细信息。用于smaple报错时调试。
+                print(f"Debug: op = {op}")
+                print(f"Debug: columns[{natural_idx}].all_distinct_values = {columns[natural_idx].all_distinct_values}, type = {type(columns[natural_idx].all_distinct_values)}")
+                print(f"Debug: vals[{natural_idx}] = {vals[natural_idx]}, type = {type(vals[natural_idx])}")
                 # There exists a filter.
                 valid_i = OPS[op](columns[natural_idx].all_distinct_values,
                                   vals[natural_idx]).astype(np.float32,
