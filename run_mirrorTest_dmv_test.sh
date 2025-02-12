@@ -6,7 +6,7 @@
 # 用于标识测试序号，与实验参数无关
 TAG=1
 DATE="20250212"
-BASE_LOG_DIR="log/train/${DATE}_tag_${TAG}_census"
+BASE_LOG_DIR="log/train/${DATE}_tag_${TAG}_dmv"
 
 # 测试参数
 NUM_QUERIES_VALUES=(1000)          # 设置候选的NUM_QUERIES值
@@ -14,8 +14,8 @@ PSAMPLE_VALUES=(2000)   # 设置候选的PSAMPLE值 默认是2000
 RESIDUAL="--residual"
 
 # 测试数据和查询路径
-DATASET="census"
-QUERYSET="datasets/census_train_3.json"
+DATASET="dmv"
+QUERYSET="datasets/1_dmv_train_4.json"
 
 # 遍历日志目录中的所有文件
 for LOG_FILE in "${BASE_LOG_DIR}"/*.txt; do
@@ -38,7 +38,7 @@ for LOG_FILE in "${BASE_LOG_DIR}"/*.txt; do
         echo "Model path (GLOB): $GLOB"
 
         # 创建结果目录
-        RESULT_DIR="./log/test/${DATE}_tag_${TAG}_census" 
+        RESULT_DIR="./log/test/${DATE}_tag_${TAG}_dmv" 
         if [ ! -d "$RESULT_DIR" ]; then
             echo "Creating directory: $RESULT_DIR"
             mkdir -p "$RESULT_DIR"

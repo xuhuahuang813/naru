@@ -27,6 +27,7 @@ torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = True
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+# DEVICE = 'cpu'
 print('Device', DEVICE)
 
 parser = argparse.ArgumentParser()
@@ -342,8 +343,8 @@ def ReportEsts(estimators):
               "\n95th", f"{np.quantile(est.errs, 0.95):.5f}",
               "\n99th", f"{np.quantile(est.errs, 0.99):.5f}",
               "\n99.9th", f"{np.quantile(est.errs, 0.999):.5f}",
-              '\nmean', f"{np.mean(est.errs):.5f}", 
-              "\nmax", f"{np.max(est.errs):.5f}", 
+              "\nmax", f"{np.max(est.errs):.5f}",
+              '\nmean', f"{np.mean(est.errs):.5f}",  
               "\ntime_ms", f"{np.mean(est.query_dur_ms):.5f}")
         v = max(v, np.max(est.errs))
     return v
