@@ -13,7 +13,7 @@ import datasets
 import made
 import transformer
 
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # DEVICE = 'cpu'
 print('Device', DEVICE)
 

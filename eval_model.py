@@ -26,7 +26,7 @@ dup_num = 1
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = True
 
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # DEVICE = 'cpu'
 print('Device', DEVICE)
 
@@ -617,7 +617,7 @@ def Main():
         assert order is None or len(order) == model.nin, order
         ReportModel(model)
         print('Loading ckpt:', s)
-        model.load_state_dict(torch.load(s))
+        model.load_state_dict(torch.load(s, map_location=DEVICE))
         model.eval()
 
         print(s, bits_gap, seed)

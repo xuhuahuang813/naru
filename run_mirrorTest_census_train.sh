@@ -4,7 +4,7 @@
 TAG=1
 
 # 实验参数
-EPOCHS=(20 100)
+EPOCHS=(20)
 DATASET="census"
 FC_HIDDENS=(128) # 默认是128
 LAYERS=(4)           # 默认是4
@@ -34,7 +34,7 @@ for EPOCH in "${EPOCHS[@]}"; do
                 echo "Logging output to $LOG_FILE"
 
                 # 执行训练脚本并将输出重定向到日志文件
-                python train_model.py --epochs=$EPOCH --fc-hiddens=$HIDDEN --layers=$LAYER --embed-size=$EMBED --residual --dataset=$DATASET > "$LOG_FILE" 2>&1
+                CUDA_VISIBLE_DEVICES=0 python train_model.py --epochs=$EPOCH --fc-hiddens=$HIDDEN --layers=$LAYER --embed-size=$EMBED --residual --dataset=$DATASET > "$LOG_FILE" 2>&1
             done
         done
     done
