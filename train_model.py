@@ -415,7 +415,7 @@ def TrainTask(seed=0):
                 epoch, mean_epoch_train_loss,
                 mean_epoch_train_loss / np.log(2)))
             since_start = time.time() - train_start
-            print('time since start: {:.1f} secs'.format(since_start))
+            print('time since start: {:.5f} secs'.format(since_start))
 
         train_losses.append(mean_epoch_train_loss)
 

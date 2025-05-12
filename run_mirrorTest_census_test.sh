@@ -5,7 +5,7 @@
 
 # 用于标识测试序号，与实验参数无关
 TAG=1
-DATE="20250506"
+DATE="20250512"
 BASE_LOG_DIR="log/train/${DATE}_tag_${TAG}_census"
 
 # 测试参数

@@ -359,6 +359,8 @@ def RunN(table,
          num_filters=11,
          oracle_cards=None,
          oracle_est=None):
+    start_time = time.time()
+    
     if rng is None:
         rng = np.random.RandomState(1234)
 
@@ -382,6 +384,8 @@ def RunN(table,
               oracle_est=oracle_est)
 
     max_err = ReportEsts(estimators)
+    total_time_sec = time.time() - start_time  # 结束计时
+    print("\nTotal time: {:.5f} seconds".format(total_time_sec))
     return False
 
 
