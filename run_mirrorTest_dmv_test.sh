@@ -5,17 +5,17 @@
 
 # 用于标识测试序号，与实验参数无关
 TAG=1
-DATE="20250212"
+DATE="20250512"
 BASE_LOG_DIR="log/train/${DATE}_tag_${TAG}_dmv"
 
 # 测试参数
-NUM_QUERIES_VALUES=(1000)          # 设置候选的NUM_QUERIES值
+NUM_QUERIES_VALUES=(2000)          # 设置候选的NUM_QUERIES值
 PSAMPLE_VALUES=(2000)   # 设置候选的PSAMPLE值 默认是2000
 RESIDUAL="--residual"
 
 # 测试数据和查询路径
 DATASET="dmv"
-QUERYSET="datasets/1_dmv_train_4.json"
+QUERYSET="datasets/dmv_10w_test.json"
 
 # 遍历日志目录中的所有文件
 for LOG_FILE in "${BASE_LOG_DIR}"/*.txt; do
@@ -54,7 +54,7 @@ for LOG_FILE in "${BASE_LOG_DIR}"/*.txt; do
                 echo "Results: $RESULT_CSV, $RESULT_TXT"
 
                 # 运行评估脚本
-                python eval_model.py \
+                CUDA_VISIBLE_DEVICES=0 python eval_model.py \
                     --glob="$GLOB" \
                     $RESIDUAL \
                     --dataset="$DATASET" \
