@@ -15,7 +15,7 @@ RESIDUAL="--residual"
 
 # 测试数据和查询路径
 DATASET="dmv"
-QUERYSET="datasets/dmv_10w_test.json"
+QUERYSET="/data/homedata/hxh/data/MirrorTestData25/250407_TrainData/dmv_10w_test_selected_filtered.json"
 
 # 遍历日志目录中的所有文件
 for LOG_FILE in "${BASE_LOG_DIR}"/*.txt; do

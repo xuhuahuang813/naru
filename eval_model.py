@@ -541,7 +541,7 @@ def SaveEstimators(path, estimators, return_df=False):
     results = pd.DataFrame()
     for est in estimators:
         data = {
-            'est': [est.name] * len(est.errs),
+            'query_no': list(range(args.num_queries)),
             'query': global_test_query[:args.num_queries],
             'err': est.errs,
             'est_card': est.est_cards,
