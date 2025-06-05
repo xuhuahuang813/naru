@@ -675,6 +675,7 @@ def Main():
         if args.run_maxdiff:
             estimators.append(
                 estimators_lib.MaxDiffHistogram(table, args.maxdiff_limit))
+            print("Histogram size: {:.2f} KB".format(estimators[0].Size() / 1024))
 
         # Other estimators can be appended as well.
 
